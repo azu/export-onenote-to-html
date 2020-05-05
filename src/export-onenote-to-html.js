@@ -68,13 +68,18 @@ const run = async (inputFile, {
     // ="data:image/tif;base64,TU0AKgAdNTz/////////////"
     const results = inputContent.matchAll(/(data:)([\w\/+]+);(charset=[\w-]+|base64).*?,([^"']+)/gi);
     const items = Array.from(results).reverse();
+    if (items.length > 0) {
+        fs.mkdirSync(path.join(output, "img/"), {
+            recursive: true
+        })
+    }
     const tasks = items.map(async (result, index) => {
-        const matchIndex = result.index || 0;
         const match = result[0] || "";
-        // force png
-        const fileName = (items.length - index) + ".png"
-        await convertImage(path.join(output, fileName), result[4]);
-        outputContent = outputContent.replace(match, fileName)
+        // force convert png
+        const filePath = path.join("img/", (items.length - index) + ".png")
+        // img/{number}.png
+        await convertImage(path.join(output, filePath), result[4]);
+        outputContent = outputContent.replace(match, filePath)
     });
     await Promise.all(tasks);
     let cleanHTML = cleanupHTML(outputContent);
