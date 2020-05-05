@@ -33,6 +33,42 @@ $ npx export-onenote-to-html downloaded-page.html --output out/
 # ...
 ```
 
+## Recipes
+
+### Bulk converting
+
+Prepare: Download your OneNote page into a directory.
+
+```
+$ ls
+a-page.html
+b-page.html
+...
+```
+
+Convert all pages to each directory using [Rargs](https://github.com/lotabout/rargs).
+
+```
+# macOS
+$ brew install rargs
+# Install CLI globally
+$ npm install --global export-onenote-to-html
+# convert 
+$ ls *.html | rargs -p '(?P<file>.*)\.(?P<ext>html)' export-onenote-to-html {file}.{ext} --output {file}
+```
+
+Results:
+
+```
+├──a-page/
+│  ├──/README.md
+│  └──/idex.html
+├──b-page.html
+│  ├──/README.md
+│  └──/idex.html
+....
+```
+
 ## Changelog
 
 See [Releases page](https://github.com/azu/export-onenote-to-html/releases).
