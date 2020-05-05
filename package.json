@@ -1,7 +1,7 @@
 {
   "name": "export-onenote-to-html",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Toolkit to convert OneNote pages into HTML and Markdown with images.",
   "homepage": "https://github.com/azu/export-onenote-to-html",
   "bugs": {
     "url": "https://github.com/azu/export-onenote-to-html/issues"
