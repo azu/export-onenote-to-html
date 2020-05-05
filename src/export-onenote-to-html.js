@@ -36,13 +36,17 @@ const cli = meow(`
 
 	Options
 	  --output path to output directory
+	  --yearDirectory Create {year}/ directory and output into the year directory
 
 	Examples
 	  $ export-onenote-to-html path/to/index.html --output output/
 `, {
     flags: {
         output: {
-            type: 'string'
+            type: "string"
+        },
+        yearDirectory: {
+            type: "boolean"
         }
     }
 });
@@ -51,6 +55,16 @@ const convertImage = (fileName, base64) => {
     return sharp(decodedFile)
         .toFile(fileName);
 }
+const metaMarkdown = (markdown) => {
+    return markdown.replace(/Page Contents\n\n(?:(.*)\s*\n\n){1,2}(\d+.*日)\s*\n\n(\d+:\d+)/, `---
+title: "$1"
+---
+
+# $1
+
+> $2 $3
+`)
+}
 const cleanupHTML = (html) => {
     return html
         .split(`<img class="one_OutlineElementHandle_16x16x32" unselectable="on" role="presentation" src="https://c1-onenote-15.cdn.office.net:443/o/s/161290131900_resources/1033/one.png">`).join("")
@@ -58,18 +72,43 @@ const cleanupHTML = (html) => {
         .split(`<span unselectable="on" class="cui-taskPaneTitle" id="AppForOfficePanel0-title">Immersive Reader</span>`).join("")
 }
 const run = async (inputFile, {
-    output
+    output,
+    yearDirectory
 }) => {
-    fs.mkdirSync(output, {
+    let outputBaseDir = output
+    const inputContent = fs.readFileSync(inputFile, "utf-8");
+    if (yearDirectory) {
+        let year;
+        {
+            const dateMatch = /(20\d+)年(\d+)月\d+日.*日<\/span>/;
+            const matchResult = inputContent.match(dateMatch);
+            if (matchResult) {
+                year = matchResult[1]
+            }
+        }
+        {
+            const dateMatch = /(20\d+)(!?<.*>)年(!?<.*>)(\d+)(!?<.*>)月/;
+            const matchResult = inputContent.match(dateMatch);
+            if (matchResult) {
+                year = matchResult[1]
+            }
+        }
+        if (year === undefined) {
+            throw new Error("Not found year. --yearDirectory does not work: " + output);
+        }
+        console.log("year", year);
+        const relativeOutput = path.relative(process.cwd(), output);
+        outputBaseDir = path.join(process.cwd(), year, relativeOutput);
+    }
+    fs.mkdirSync(outputBaseDir, {
         recursive: true
     });
-    const inputContent = fs.readFileSync(inputFile, "utf-8");
     let outputContent = inputContent;
     // ="data:image/tif;base64,TU0AKgAdNTz/////////////"
     const results = inputContent.matchAll(/(data:)([\w\/+]+);(charset=[\w-]+|base64).*?,([^"']+)/gi);
     const items = Array.from(results).reverse();
     if (items.length > 0) {
-        fs.mkdirSync(path.join(output, "img/"), {
+        fs.mkdirSync(path.join(outputBaseDir, "img/"), {
             recursive: true
         })
     }
@@ -78,7 +117,7 @@ const run = async (inputFile, {
         // force convert png
         const filePath = path.join("img/", (items.length - index) + ".png")
         // img/{number}.png
-        await convertImage(path.join(output, filePath), result[4]);
+        await convertImage(path.join(outputBaseDir, filePath), result[4]);
         outputContent = outputContent.replace(match, filePath)
     });
     await Promise.all(tasks);
@@ -94,8 +133,10 @@ ${cleanHTML}
 </body>
 </html>
 `
-    fs.writeFileSync(path.join(output, "index.html"), doc, "utf-8");
-    fs.writeFileSync(path.join(output, "README.md"), turndownService.turndown(cleanHTML), "utf-8");
+    const outputMarkdown = metaMarkdown(turndownService.turndown(cleanHTML));
+    fs.writeFileSync(path.join(outputBaseDir, "index.html"), doc, "utf-8");
+    fs.writeFileSync(path.join(outputBaseDir, "README.md"), outputMarkdown, "utf-8");
+    fs.unlinkSync(inputFile);
 }
 
 if (!module.parent) {
