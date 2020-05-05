@@ -63,7 +63,7 @@ Results:
 ├──a-page/
 │  ├──/README.md
 │  └──/idex.html
-├──b-page.html
+├──b-page/
 │  ├──/README.md
 │  └──/idex.html
 ....
