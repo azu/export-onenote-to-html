@@ -20,14 +20,17 @@ Tips: when browser complete downloaded, make button `blue` color.
 
 ### 2. Convert downloaded page to HTML and Markdown
 
-Convert downloaded html file and convet it to HTML and Markdown.
+Convert downloaded html file and convert it to HTML and Markdown.
 Also, decode base64 image and output it as actual image file.
 
 ```
 $ npx export-onenote-to-html downloaded-page.html --output out/ 
+# This command output following:
 # out/index.html
 # out/README.md
-# out/1.png ...
+# out/1.png
+# out/2.png 
+# ...
 ```
 
 ## Changelog
