@@ -1,6 +1,6 @@
 # export-onenote-to-html
 
-A Toolkit to convert OneNote pages into HTML and Markdown with images.
+A Toolkit that convert OneNote pages into HTML and Markdown with images.
 
 ## Usage
 
