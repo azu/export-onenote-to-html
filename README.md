@@ -28,8 +28,8 @@ $ npx export-onenote-to-html downloaded-page.html --output out/
 # This command output following:
 # out/index.html
 # out/README.md
-# out/1.png
-# out/2.png 
+# out/img/1.png
+# out/img/2.png 
 # ...
 ```
 
